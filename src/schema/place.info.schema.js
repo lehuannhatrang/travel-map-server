@@ -1,5 +1,5 @@
-export const RestaurantInfoSchema = {
-    restaurantId: Number,
+export const PlaceInfoSchema = {
+    placeId: Number,
 
     name: String,
 
@@ -13,6 +13,8 @@ export const RestaurantInfoSchema = {
 
     maxPrice: String,
 
-    mainImgUri: String
+    mainImgUri: String,
+
+    pictures: [String]
     
 }

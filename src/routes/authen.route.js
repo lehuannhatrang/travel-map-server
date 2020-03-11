@@ -64,11 +64,11 @@ AuthenRoute.use('/signup', (req, res) => {
                 displayName: name,
                 phone,
             }
-            console.log(newUser)
             UserModel.createModel(newUser)
             .then(newModel => {
                 HttpUtil.makeJsonResponse(res, {userId: newModel.userId})
             })
+            .catch(err => console.log(err))
             .catch(err =>{console.log(err); HttpUtil.makeErrorResponse(res, Error.UNKNOWN)})
         };
     });

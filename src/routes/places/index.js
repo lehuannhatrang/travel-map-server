@@ -1,5 +1,5 @@
 import express from 'express';
-import { RestaurantInfoModel } from '../../models';
+import { PlaceInfoModel, PlaceRatingModel } from '../../models';
 import HttpUtil from "../../utils/http.util";
 import {Error} from "../../errors/Error";
 import { exec } from "child_process";
@@ -10,11 +10,13 @@ const PlaceRouter = express.Router();
 PlaceRouter.get('/detail', (req, res) => {
     const placeId = req.query.id;
 
-    RestaurantInfoModel.getOneByQuery({restaurantId: placeId})
+    PlaceInfoModel.getOneByQuery({placeId})
     .then(place => {
         if(!place) return HttpUtil.makeErrorResponse(res, Error.ITEM_NOT_FOUND);
-
-        HttpUtil.makeJsonResponse(res, {place})
+        PlaceRatingModel.getOneByQuery({placeId})
+        .then(ratingPoint => {
+            HttpUtil.makeJsonResponse(res, {place: {...place, ... ratingPoint}})
+        })
     })
     .catch(err => HttpUtil.makeErrorResponse(res, Error.UNKNOWN))
 })
@@ -24,7 +26,7 @@ PlaceRouter.get('/criterial-base/list', (req, res) => {
 
     const criteriaScriptPath = `${IndexConfig.RECOMMENDER_SYSTEM_BASE_DIR}/${IndexConfig.CRITERIA_BASED_SCRIPT}`
 
-    const command = `python3 ${criteriaScriptPath} ${spacePoint} ${locationPoint} ${qualityPoint} ${servicePoint} ${pricePoint}`;
+    const command = `python3.5 ${criteriaScriptPath} ${spacePoint} ${locationPoint} ${qualityPoint} ${servicePoint} ${pricePoint}`;
 
     exec(command, (error, stdout, stderr) => {
         if (error) {
@@ -32,12 +34,17 @@ PlaceRouter.get('/criterial-base/list', (req, res) => {
             HttpUtil.makeErrorResponse(res, 500)
             return;
         }
-        const result = stdout.split(',')
-        console.log(`${result}`);
-        RestaurantInfoModel.getByQuery({restaurantId: {$in:[ 4827,3807,10885,11986,10615,5670,10699,5190,12567,7669] }})
+        const restaurantList = stdout.replace('\n', '').split(',')
+        PlaceInfoModel.getByQuery({placeId: {$in: restaurantList }})
         .then(result => {
             console.log(result)
+            PlaceRatingModel.getByQuery({placeId: {$in: restaurantList }})
+            .then(ratingPoints => {
+                HttpUtil.makeJsonResponse(res, {places: result, ratingPoints })
+            })
+            .catch(err => console.log(err))
         })
+        .catch(err => HttpUtil.makeErrorResponse(res, 500))
     });
 })
 
