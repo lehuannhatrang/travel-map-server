@@ -2,7 +2,8 @@ import path from 'path';
 export const ProdConfig = {
     PROFILE: 'production',
     AUTH_DB: {
-        url: 'mongodb://mongodb:27019/guidy', options: {
+        url: 'mongodb://localhost:27017/guidy', 
+        options: {
             user: "",
             pass: "",
             useNewUrlParser: true
