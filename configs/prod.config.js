@@ -1,7 +1,8 @@
+import path from 'path';
 export const ProdConfig = {
     PROFILE: 'production',
     AUTH_DB: {
-        url: 'mongodb://mongodb:27017/guidy', options: {
+        url: 'mongodb://mongodb:27019/guidy', options: {
             user: "",
             pass: "",
             useNewUrlParser: true
@@ -10,5 +11,8 @@ export const ProdConfig = {
     URL_BACKEND: "https://guidy.com/api",
     URL_FRONTEND: "https://guidy.com",
     BASE_NAME: '/',
-    ACCESS_CONTROL_ORIGIN: '*'
+    CLIENT_PATH: path.resolve(__dirname, 'dist'),
+    ACCESS_CONTROL_ORIGIN: '*',
+    RECOMMENDER_SYSTEM_BASE_DIR: '/home/leehun/guidy/travel-map-recommendation-system',
+    CRITERIA_BASED_SCRIPT: 'Criteria-Based_RS.py'
 }

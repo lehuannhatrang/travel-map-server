@@ -15,7 +15,7 @@ services:
     - mongodb
   mongodb:
     image: mongo:latest
-    container_name: "mongodb-guidy"
+    container_name: "mongo-guidy"
     environment:
     - MONGO_DATA_DIR=/data/db
     - MONGO_LOG_DIR=/dev/null
