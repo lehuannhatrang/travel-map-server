@@ -20,6 +20,4 @@ services:
     - MONGO_DATA_DIR=/data/db
     - MONGO_LOG_DIR=/dev/null
     ports:
-    - 27019:27017
-    volumes:
-    - 'mongodb:/data/guidy/db'
+    - 27017:27017
