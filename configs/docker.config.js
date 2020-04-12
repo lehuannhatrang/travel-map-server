@@ -2,7 +2,7 @@ import path from 'path';
 export const DockerConfig = {
     PROFILE: 'dev',
     AUTH_DB: {
-        url: 'mongodb://mongodb:27019/guidy', options: {
+        url: 'mongodb://mongodb:27017/guidy', options: {
             user: "",
             pass: "",
             useNewUrlParser: true
