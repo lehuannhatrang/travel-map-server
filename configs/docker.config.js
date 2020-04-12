@@ -1,8 +1,8 @@
 import path from 'path';
 export const DockerConfig = {
-    PROFILE: 'dev',
+    PROFILE: 'docker',
     AUTH_DB: {
-        url: 'mongodb://localhost:27017/guidy', options: {
+        url: 'mongodb://mongodb:27017/guidy', options: {
             user: "",
             pass: "",
             useNewUrlParser: true

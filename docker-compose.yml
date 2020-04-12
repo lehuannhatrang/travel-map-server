@@ -21,4 +21,5 @@ services:
     - MONGO_LOG_DIR=/dev/null
     ports:
     - 27019:27017
-    command: mongod --smallfiles --logpath=/dev/null
+    volumes:
+    - 'mongodb:/data/guidy/db'
