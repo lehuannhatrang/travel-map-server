@@ -10,5 +10,5 @@ RUN npm run build
 
 # production environment
 EXPOSE 5001
-CMD ["npm", "run" ,"start:dev-docker"]
+CMD ["npm", "run" ,"start:docker"]
 

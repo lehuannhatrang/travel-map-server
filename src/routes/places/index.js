@@ -35,6 +35,7 @@ PlaceRouter.get('/criterial-base/list', (req, res) => {
             return;
         }
         const restaurantList = stdout.replace('\n', '').split(',')
+        console.log(stdout)
         PlaceInfoModel.getByQuery({placeId: {$in: restaurantList }})
         .then(result => {
             console.log(result)
@@ -46,6 +47,10 @@ PlaceRouter.get('/criterial-base/list', (req, res) => {
         })
         .catch(err => HttpUtil.makeErrorResponse(res, 500))
     });
+})
+
+PlaceRouter.post('/rating', (req, res) => {
+    
 })
 
 
