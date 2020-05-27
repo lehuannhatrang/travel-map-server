@@ -10,42 +10,6 @@ import passwordHash from "password-hash";
 
 const AuthenRoute = express.Router();
 
-
-// AuthenRoute.get('/token', AuthenMiddleware.isAuthenticated, (req, res) => {
-//     if (req.session.token) return HttpUtil.makeJsonResponse(res, { token: req.session.token });
-//     return HttpUtil.makeErrorResponse(res, "Not Authenticated 2 !!!", 500);
-// });
-
-// AuthenRoute.use('/login/sso', (req, res, next) => {
-//     Passport.authenticate('cas', {session: false}, function (err, user, info) {
-//         if (err) {
-//             return next(err);
-//         }
-
-//         if (!user) {
-//             return res.redirect(`${req.query.redirect}?user=noUser`)
-//         }
-
-//         req.login(user, {session: false}, function (err) {
-//             if (err) {
-//                 return next(err);
-//             }
-//             //create token add session
-//             TokenUtil.createToken(user, CommonConfig.SECRET)
-//                 .then((token) => {
-//                     if (req.query.checkUser) {
-//                         res.redirect(`${req.query.redirect}?user=${user.user}`)
-//                     } else {
-//                         res.redirect(`${req.query.redirect}?authorization=${token}`)
-//                     }
-
-//                 }, (err) => {
-//                     return next(err);
-//                 });
-//         });
-//     })(req, res, next);
-// });
-
 AuthenRoute.use('/signup', (req, res) => {
     const { email, name, phone, password } = req.body;
     if(!email || !name || !phone || !password)  HttpUtil.makeErrorResponse(res, Error.BAD_REQUEST);
@@ -76,7 +40,6 @@ AuthenRoute.use('/signup', (req, res) => {
 
 AuthenRoute.use('/login', (req, res, next) => {
     Passport.authenticate('local', {session: false}, function (err, user, info) {
-        console.log(user)
         if (err) {
             return next(err);
         }
@@ -97,7 +60,6 @@ AuthenRoute.use('/login', (req, res, next) => {
                 return next(err);
             });
         });
-        console.log('next', next)
     })(req, res, next);
 });
 
@@ -107,9 +69,11 @@ AuthenRoute.use('/verify', (req, res, next) => {
 });
 
 AuthenRoute.get('/logout', function (req, res) {
-    //req.session.destroy(function (err) {
-        res.redirect(urljoin(IndexConfig.CAS_URL, `/logout?service=${IndexConfig.URL_FRONTEND}/login`));
-    //});
+    req.logout()
+    HttpUtil.makeJsonResponse(res, {message: "Logout successfully"})
+    // req.session.destroy(function (err) {
+        // res.redirect(urljoin(IndexConfig.CAS_URL, `/logout?service=${IndexConfig.URL_FRONTEND}/login`));
+    // });
 });
 
 export default AuthenRoute;

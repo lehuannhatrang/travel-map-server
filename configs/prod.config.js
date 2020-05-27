@@ -14,5 +14,6 @@ export const ProdConfig = {
     CLIENT_PATH: path.resolve(__dirname, 'dist'),
     ACCESS_CONTROL_ORIGIN: '*',
     RECOMMENDER_SYSTEM_BASE_DIR: '/home/leehun/guidy/travel-map-recommendation-system',
-    CRITERIA_BASED_SCRIPT: 'Criteria-Based_RS.py'
+    CRITERIA_BASED_SCRIPT: 'Criteria-Based_RS.py',
+    RECOMMENDER_SERVICE_URL: 'http://localhost:8086'
 }

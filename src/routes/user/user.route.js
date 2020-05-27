@@ -21,6 +21,7 @@ UserRouter.get('/', (req, res) => {
     UserModel.getById(userId, 'userInfo')
         .then(user => {
             if (user) {
+                delete user.password;
                 HttpUtil.makeJsonResponse(res, user);
             } else {
                 HttpUtil.makeErrorResponse(res, Error.ITEM_NOT_FOUND);
@@ -50,6 +51,24 @@ UserRouter.put('/info', (req, res) => {
         return HttpUtil.makeErrorResponse(res, Error.WRONG_USER)
     UserInfoModel.updateModel(req.body.id, req.body, req.user.sub)
         .then(userInfo => HttpUtil.makeJsonResponse(res, userInfo));
+})
+
+UserRouter.post('/avatar', (req, res) => {
+    const userId = req.user.sub;
+    const avatar = req.body.img;
+    UserModel.getById(userId)
+    .then(user => {
+        if (!user) return HttpUtil.makeErrorResponse(res, Error.ITEM_NOT_FOUND);
+        let newModel = user;
+        newModel.avatar = avatar;
+        UserModel.updateModel(newModel, req.user.sub)
+        .then(updatedUser => {
+            HttpUtil.makeJsonResponse(res, updatedUser)
+        })
+    })
+    .catch(err => {
+        HttpUtil.makeErrorResponse(res, Error.UN_AUTHORIZATION);
+    })
 })
 
 export default UserRouter;

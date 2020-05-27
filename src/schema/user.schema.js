@@ -23,4 +23,6 @@ export const UserSchema = {
     displayName: String,
     
     phone: String,
+
+    avatar: String,
 }

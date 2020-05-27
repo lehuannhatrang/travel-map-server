@@ -13,8 +13,8 @@ class TokenUtil {
 
     static async createToken(user, secret) {
         //can get role
-        const { id } = user;
-        return await jwt.sign({ sub: id }, secret, { expiresIn: CommonConfig.MAX_AGE_SESSION });
+        const { id, userId } = user;
+        return await jwt.sign({ sub: id, userId: userId }, secret, { expiresIn: CommonConfig.MAX_AGE_SESSION });
     }
 
     static encodingAppToken(token) {

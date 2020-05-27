@@ -2,6 +2,7 @@ import {IndexConfig} from "./configs";
 import AuthenMiddleware from "./src/middlewares/index";
 import IndexRoute from "./src/routes/index";
 import winston from "./configs/winston/winston.config";
+var bodyParser = require('body-parser')
 
 const Passport = require("passport");
 
@@ -23,6 +24,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(function (req, res, next) {
 
     // Website you wish to allow to connect

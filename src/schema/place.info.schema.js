@@ -15,6 +15,25 @@ export const PlaceInfoSchema = {
 
     mainImgUri: String,
 
-    pictures: [String]
+    pictures: [String],
+
+    latitude: String,
+
+    longitude: String,
+
+    addressRegion: String,
+
+    addressLocality: String,
+
+    streetAddress: String,
+
+    mainCategory: String,
+
+    subCategory: String,
+
+    type: {
+        type: "String",
+        enum: ["RESTAURANT", "VISITING"]
+    }
     
 }
