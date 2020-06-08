@@ -25,4 +25,9 @@ export const UserSchema = {
     phone: String,
 
     avatar: String,
+
+    canRecommendByMf: {
+        type: Boolean,
+        default: false
+    }
 }

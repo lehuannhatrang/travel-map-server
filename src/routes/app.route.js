@@ -5,6 +5,7 @@ import {UserModel} from '../models'
 import HttpUtil from "../utils/http.util";
 import {Error} from "../errors/Error";
 import PlaceRoute from "./places";
+import PlanningTrip from "./planning-trip";
 
 const AppRoute = express.Router();
 
@@ -30,5 +31,6 @@ AppRoute.use('/isLogin', (req, res) => {
 AppRoute.use('/user', UserRouter);
 AppRoute.use('/action', UserActionRouter);
 AppRoute.use('/places', PlaceRoute);
+AppRoute.use('/planning-trip', PlanningTrip)
 
 export default AppRoute;

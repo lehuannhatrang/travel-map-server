@@ -11,6 +11,15 @@ const recommenderServiceApiHeaders = {
     "Authorization": CommonConfig.RECOMMENDER_SERVICE_API_KEY
 }
 
+function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+  
+
 PlaceRouter.get('/detail', (req, res) => {
     const placeId = req.query.id;
 
@@ -47,24 +56,40 @@ PlaceRouter.get('/criterial-base/list', (req, res) => {
         })
         .catch(err => HttpUtil.makeErrorResponse(res, 500))
     })
+})
 
-    // exec(command, (error, stdout, stderr) => {
-    //     if (error) {
-    //         console.log(`error: ${error.message}`);
-    //         HttpUtil.makeErrorResponse(res, 500)
-    //         return;
-    //     }
-    //     const restaurantList = stdout.replace('\n', '').split(',')
-    //     PlaceInfoModel.getByQuery({placeId: {$in: restaurantList }})
-    //     .then(result => {
-    //         PlaceRatingModel.getByQuery({placeId: {$in: restaurantList }})
-    //         .then(ratingPoints => {
-    //             HttpUtil.makeJsonResponse(res, {places: result, ratingPoints })
-    //         })
-    //         .catch(err => console.log(err))
-    //     })
-    //     .catch(err => HttpUtil.makeErrorResponse(res, 500))
-    // });
+
+PlaceRouter.get('/recommender-places', async (req, res) => {
+    const user = await UserModel.getOneByQuery({_id: req.user.sub});
+    let useMF = false;
+    if(!user.canRecommendByMf) {
+        const userRatings = await UserRatingModel.getByQuery({"User_Id": user.userId})
+        if(userRatings.length > 3) {
+            useMF = true
+        }
+        UserModel.updateModel({...user, canRecommendByMf: true}, req.user.sub)
+    }
+
+    let recommenderList = []
+    if(user.canRecommendByMf || useMF) {
+        const placeList = await HttpUtil.postJson(`${IndexConfig.RECOMMENDER_SERVICE_URL}/recommender-places/MF-recommender`, {userId: user.userId, placeType: 'RESTAURANT'}, recommenderServiceApiHeaders)
+        recommenderList = placeList.recommenderPlaces;
+    }
+    else {
+        const { spacePoint, locationPoint, qualityPoint, servicePoint, pricePoint} = req.query
+    
+        const criteria = [spacePoint, locationPoint, qualityPoint, servicePoint, pricePoint]
+    
+        const placeList = await HttpUtil.postJson(`${IndexConfig.RECOMMENDER_SERVICE_URL}/recommender-places/criteria`, {criteria}, recommenderServiceApiHeaders)
+        
+        recommenderList = placeList.recommenderPlaces;
+    }
+
+    const result = await PlaceInfoModel.getByQuery({placeId: {$in: recommenderList }})
+
+    const ratingPoints = await PlaceRatingModel.getByQuery({placeId: {$in: recommenderList }})
+
+    HttpUtil.makeJsonResponse(res, {places: shuffle(result), ratingPoints })
 })
 
 PlaceRouter.get('/rating', async (req, res) => {
