@@ -4,10 +4,10 @@ import { ProdConfig } from './prod.config';
 import { CommonConfig } from './common.config';
 
 let IndexConfig = ''
-if(process.env.NODE_ENV === 'docker') {
-    IndexConfig = DockerConfig
+if(process.env.NODE_ENV === 'production') {
+    IndexConfig = ProdConfig
 } else {
-    IndexConfig = (process.env.NODE_ENV === 'production') ? ProdConfig : DevConfig;    
+    IndexConfig = DevConfig;    
 }
 
 export { IndexConfig, CommonConfig }
