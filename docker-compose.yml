@@ -8,16 +8,16 @@ services:
     volumes:
     - .:/usr/app
     environment:
-    - NODE_ENV=dev-docker
-    links:
-    - mongodb
-    depends_on:
-    - mongodb
-  mongodb:
-    image: mongo:latest
-    container_name: "mongo-guidy"
-    environment:
-    - MONGO_DATA_DIR=/data/db
-    - MONGO_LOG_DIR=/dev/null
-    ports:
-    - 27019:27017
+    - NODE_ENV=production
+    # links:
+    # - mongodb
+    # depends_on:
+    # - mongodb
+  # mongodb:
+  #   image: mongo:latest
+  #   container_name: "mongo-guidy"
+  #   environment:
+  #   - MONGO_DATA_DIR=/data/db
+  #   - MONGO_LOG_DIR=/dev/null
+  #   ports:
+  #   - 27019:27017
