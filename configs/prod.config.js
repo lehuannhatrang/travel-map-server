@@ -2,7 +2,7 @@ import path from 'path';
 export const ProdConfig = {
     PROFILE: 'production',
     AUTH_DB: {
-        url: 'mongodb://host.docker.internal:27017/guidy', options: {
+        url: 'mongodb://localhost:27017/guidy', options: {
             user: "",
             pass: "",
             useNewUrlParser: true
@@ -15,5 +15,5 @@ export const ProdConfig = {
     ACCESS_CONTROL_ORIGIN: '*',
     RECOMMENDER_SYSTEM_BASE_DIR: '/home/leehun/guidy/travel-map-recommendation-system',
     CRITERIA_BASED_SCRIPT: 'Criteria-Based_RS.py',
-    RECOMMENDER_SERVICE_URL: 'http://host.docker.internal:8086'
+    RECOMMENDER_SERVICE_URL: 'http://localhost:8086'
 }

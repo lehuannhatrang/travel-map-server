@@ -9,6 +9,7 @@ services:
     - .:/usr/app
     environment:
     - NODE_ENV=production
+    network_mode: "host"
     # links:
     # - mongodb
     # depends_on:
