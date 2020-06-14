@@ -66,8 +66,8 @@ PlaceRouter.get('/recommender-places', async (req, res) => {
         const userRatings = await UserRatingModel.getByQuery({"User_Id": user.userId})
         if(userRatings.length > 3) {
             useMF = true
+            UserModel.updateModel({...user, canRecommendByMf: true}, req.user.sub)
         }
-        UserModel.updateModel({...user, canRecommendByMf: true}, req.user.sub)
     }
 
     let recommenderList = []

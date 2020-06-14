@@ -6,7 +6,7 @@
     "clean": "rm -rf dist",
     "build": "npm run clean && mkdir dist && babel . -s -d ./dist --ignore node_modules",
     "start": "NODE_ENV=production PORT=5001 node bin/prod",
-    "start:dev": "NODE_ENV=dev PORT=5001 nodemon bin/dev",
+    "start:dev": "NODE_ENV=dev PORT=5001 node bin/dev",
     "start:docker": "NODE_ENV=docker PORT=5001 node bin/dev"
   },
   "dependencies": {
