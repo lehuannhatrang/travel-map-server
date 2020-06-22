@@ -60,8 +60,15 @@ PlaceRouter.get('/criterial-base/list', (req, res) => {
 
 
 PlaceRouter.get('/recommender-places', async (req, res) => {
+    const { spacePoint, locationPoint, qualityPoint, servicePoint, pricePoint} = req.query
+
+    const criteria = [spacePoint, locationPoint, qualityPoint, servicePoint, pricePoint]
+
     const user = await UserModel.getOneByQuery({_id: req.user.sub});
+
     let useMF = false;
+    
+    console.log(user)
     if(!user.canRecommendByMf) {
         const userRatings = await UserRatingModel.getByQuery({"User_Id": user.userId})
         if(userRatings.length > 3) {
@@ -72,13 +79,10 @@ PlaceRouter.get('/recommender-places', async (req, res) => {
 
     let recommenderList = []
     if(user.canRecommendByMf || useMF) {
-        const placeList = await HttpUtil.postJson(`${IndexConfig.RECOMMENDER_SERVICE_URL}/recommender-places/MF-recommender`, {userId: user.userId, placeType: 'RESTAURANT'}, recommenderServiceApiHeaders)
+        const placeList = await HttpUtil.postJson(`${IndexConfig.RECOMMENDER_SERVICE_URL}/recommender-places/MF-recommender`, {criteria ,userId: user.userId, placeType: 'RESTAURANT'}, recommenderServiceApiHeaders)
         recommenderList = placeList.recommenderPlaces;
     }
     else {
-        const { spacePoint, locationPoint, qualityPoint, servicePoint, pricePoint} = req.query
-    
-        const criteria = [spacePoint, locationPoint, qualityPoint, servicePoint, pricePoint]
     
         const placeList = await HttpUtil.postJson(`${IndexConfig.RECOMMENDER_SERVICE_URL}/recommender-places/criteria`, {criteria}, recommenderServiceApiHeaders)
         
