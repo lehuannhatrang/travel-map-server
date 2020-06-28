@@ -1,5 +1,5 @@
 import express from 'express';
-import { PlaceInfoModel, PlaceRatingModel, UserRatingModel, UserModel } from '../../models';
+import { PlaceInfoModel, PlaceRatingModel, UserRatingModel, UserModel, UserCriteriaModel } from '../../models';
 import HttpUtil from "../../utils/http.util";
 import {Error} from "../../errors/Error";
 import { exec } from "child_process";
@@ -60,15 +60,23 @@ PlaceRouter.get('/criterial-base/list', (req, res) => {
 
 
 PlaceRouter.get('/recommender-places', async (req, res) => {
-    const { spacePoint, locationPoint, qualityPoint, servicePoint, pricePoint} = req.query
+    // const { spacePoint, locationPoint, qualityPoint, servicePoint, pricePoint} = req.query
 
-    const criteria = [spacePoint, locationPoint, qualityPoint, servicePoint, pricePoint]
+    let criteria = []
 
     const user = await UserModel.getOneByQuery({_id: req.user.sub});
 
+    const userCriteria = await UserCriteriaModel.getOneByQuery({user})
+
+    if(!userCriteria) {
+        criteria = [9,9,9,9,9]
+    }
+    else {
+        criteria = [userCriteria.spaceRating, userCriteria.locationRating, userCriteria.qualityRating, userCriteria.serviceRating, userCriteria.priceRating]
+    }
+
     let useMF = false;
     
-    console.log(user)
     if(!user.canRecommendByMf) {
         const userRatings = await UserRatingModel.getByQuery({"User_Id": user.userId})
         if(userRatings.length > 3) {
@@ -139,11 +147,11 @@ PlaceRouter.post('/rating', async (req, res) => {
         "Rating" : averageRating,
         "TotalLike" : 0,
         "RestaurantUrl" : '',
-        "Rating_Space" : rating.spaceRating,
-        "Rating_Location" : rating.locationRating,
-        "Rating_Quality" : rating.qualityRating,
-        "Rating_Service" : rating.serviceRating,
-        "Rating_Price" : rating.priceRating,
+        "Rating_Space" : rating.spaceRating*10,
+        "Rating_Location" : rating.locationRating*10,
+        "Rating_Quality" : rating.qualityRating*10,
+        "Rating_Service" : rating.serviceRating*10,
+        "Rating_Price" : rating.priceRating*10,
         "TimeStamp" : new Date(),
         type: placeInfo.type
     }
@@ -151,6 +159,19 @@ PlaceRouter.post('/rating', async (req, res) => {
     UserRatingModel.createModel(new_rating)
     
     HttpUtil.makeJsonResponse(res, {message: "Rating sucessfully"})
+})
+
+PlaceRouter.get('/search', async (req, res) => {
+    const keyword = req.query.keyword;
+    const searchPlaces = await PlaceInfoModel.getByQuery({$or: [
+        {name: { $regex: keyword, $options: 'i'}},
+        {address: { $regex: keyword, $options: 'i'}}
+    ]})
+    const searchListId = await searchPlaces.map(place => place.placeId)
+    const ratingPoints = await PlaceRatingModel.getByQuery({placeId: {$in: searchListId }})
+
+    HttpUtil.makeJsonResponse(res, {places: searchPlaces, ratingPoints});
+
 })
 
 

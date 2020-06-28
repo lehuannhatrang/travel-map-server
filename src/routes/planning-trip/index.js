@@ -12,6 +12,7 @@ const recommenderServiceApiHeaders = {
 }
 
 router.post('/suggestion-trips', async (req, res) => {
+    console.log('lll')
     const planning = req.body.planning
 
     const currentUser = await UserModel.getOneByQuery({_id: req.user.sub})
@@ -22,7 +23,8 @@ router.post('/suggestion-trips', async (req, res) => {
         suggestionTrips = await HttpUtil.postJson(`${IndexConfig.RECOMMENDER_SERVICE_URL}/planning-trips`, {userId: currentUser.userId, planning}, recommenderServiceApiHeaders);
     }
     else {
-        suggestionTrips = await HttpUtil.postJson(`${IndexConfig.RECOMMENDER_SERVICE_URL}/planning-trips`, {userId: currentUser.userId, planning}, recommenderServiceApiHeaders);
+        const criteria = [8,7,9,9,8]
+        suggestionTrips = await HttpUtil.postJson(`${IndexConfig.RECOMMENDER_SERVICE_URL}/planning-trips`, {userId: currentUser.userId, criteria: criteria, planning}, recommenderServiceApiHeaders);
     }
 
     console.log(suggestionTrips)

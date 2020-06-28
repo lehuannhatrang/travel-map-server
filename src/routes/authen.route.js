@@ -5,7 +5,7 @@ import Passport from 'passport';
 import urljoin from 'url-join';
 import HttpUtil from "../utils/http.util";
 import {Error} from "../errors/Error";
-import { UserModel } from "../models";
+import { UserModel, UserCriteriaModel } from "../models";
 import passwordHash from "password-hash";
 
 const AuthenRoute = express.Router();
@@ -30,6 +30,10 @@ AuthenRoute.use('/signup', (req, res) => {
             }
             UserModel.createModel(newUser)
             .then(newModel => {
+                const newUserCriteria = {
+                    user: newModel,
+                }
+                UserCriteriaModel.createModel(newUserCriteria)
                 HttpUtil.makeJsonResponse(res, {userId: newModel.userId})
             })
             .catch(err => console.log(err))

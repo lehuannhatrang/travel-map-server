@@ -1,5 +1,5 @@
 import express from 'express';
-import { UserModel, UserInfoModel } from '../../models';
+import { UserModel, UserInfoModel, UserCriteriaModel } from '../../models';
 import HttpUtil from "../../utils/http.util";
 import {Error} from "../../errors/Error";
 
@@ -69,6 +69,59 @@ UserRouter.post('/avatar', (req, res) => {
     .catch(err => {
         HttpUtil.makeErrorResponse(res, Error.UN_AUTHORIZATION);
     })
+})
+
+UserRouter.get('/criteria', async (req, res) => {
+    const user = await UserModel.getOneByQuery({_id: req.user.sub})
+    const userCriteria = await UserCriteriaModel.getOneByQuery({user})
+    if(!userCriteria) {
+        const newUserCriteria = {
+            user,
+            spaceRating: 9,
+            locationRating: 9,
+            qualityRating: 9,
+            serviceRating: 9,
+            priceRating: 9
+        }
+        UserCriteriaModel.createModel(newUserCriteria)
+        .then(newModel => {
+            HttpUtil.makeJsonResponse(res, {criteria: newModel})
+        })
+        .catch(err => HttpUtil.makeErrorResponse(res, 500))
+    }
+    else {
+        HttpUtil.makeJsonResponse(res, {criteria: userCriteria})
+    }
+})
+
+UserRouter.post('/criteria', async (req, res) => {
+    const rating = req.body.rating;
+    const user = await UserModel.getOneByQuery({_id: req.user.sub})
+    const userCriteria = await UserCriteriaModel.getOneByQuery({user})
+    if(!userCriteria) {
+        const newUserCriteria = {
+            user,
+            spaceRating: rating.spaceRating*10,
+            locationRating: rating.locationRating*10,
+            qualityRating: rating.qualityRating*10,
+            serviceRating: rating.serviceRating*10,
+            priceRating: rating.priceRating*10
+        }
+        await UserCriteriaModel.createModel(newUserCriteria)
+        HttpUtil.makeJsonResponse(res, {message: 'Create new criteria'})
+    }
+    else {
+        let updateCriteria = {
+            ...userCriteria,
+            spaceRating: rating.spaceRating*10,
+            locationRating: rating.locationRating*10,
+            qualityRating: rating.qualityRating*10,
+            serviceRating: rating.serviceRating*10,
+            priceRating: rating.priceRating*10
+        }
+        await UserCriteriaModel.updateModel(updateCriteria)
+        HttpUtil.makeHttpResponse(res, {message: 'Update criteria successfully'})
+    }
 })
 
 export default UserRouter;
