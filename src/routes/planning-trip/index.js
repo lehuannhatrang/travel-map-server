@@ -1,5 +1,5 @@
 import express from 'express';
-import {UserActionModel, UserModel, PlaceInfoModel} from '../../models';
+import {UserActionModel, UserModel, PlaceInfoModel, UserCriteriaModel} from '../../models';
 import HttpUtil from "../../utils/http.util";
 import {Error} from "../../errors/Error";
 import { IndexConfig, CommonConfig } from "../../../configs";
@@ -19,15 +19,27 @@ router.post('/suggestion-trips', async (req, res) => {
 
     let suggestionTrips = []
 
-    if(currentUser.canRecommendByMf) {
-        suggestionTrips = await HttpUtil.postJson(`${IndexConfig.RECOMMENDER_SERVICE_URL}/planning-trips`, {userId: currentUser.userId, planning}, recommenderServiceApiHeaders);
+    let criteria = [];
+
+    const user = await UserModel.getOneByQuery({_id: req.user.sub})
+
+    const userCriteria = await UserCriteriaModel.getOneByQuery({user})
+
+    if(!userCriteria) {
+        criteria = [9,9,9,9,9]
     }
     else {
-        const criteria = [8,7,9,9,8]
-        suggestionTrips = await HttpUtil.postJson(`${IndexConfig.RECOMMENDER_SERVICE_URL}/planning-trips`, {userId: currentUser.userId, criteria: criteria, planning}, recommenderServiceApiHeaders);
+        criteria = [userCriteria.spaceRating, userCriteria.locationRating, userCriteria.qualityRating, userCriteria.serviceRating, userCriteria.priceRating]
     }
 
-    console.log(suggestionTrips)
+    if(currentUser.canRecommendByMf) {
+        suggestionTrips = await HttpUtil.postJson(`${IndexConfig.RECOMMENDER_SERVICE_URL}/planning-trips`, {userId: currentUser.userId, criteria, planning, userMF: true}, recommenderServiceApiHeaders);
+    }
+    else {
+        suggestionTrips = await HttpUtil.postJson(`${IndexConfig.RECOMMENDER_SERVICE_URL}/planning-trips`, {userId: currentUser.userId, criteria, planning, userMF: false}, recommenderServiceApiHeaders);
+    }
+
+    console.log(suggestionTrips.routes[0].route)
 
     HttpUtil.makeJsonResponse(res, suggestionTrips)
 })
