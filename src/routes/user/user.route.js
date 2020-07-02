@@ -1,5 +1,5 @@
 import express from 'express';
-import { UserModel, UserInfoModel, UserCriteriaModel } from '../../models';
+import { UserModel, UserInfoModel, UserCriteriaModel, TripRecommendUserModel } from '../../models';
 import HttpUtil from "../../utils/http.util";
 import {Error} from "../../errors/Error";
 
@@ -31,6 +31,20 @@ UserRouter.get('/', (req, res) => {
             console.log(err)
             HttpUtil.makeErrorResponse(res, Error.UN_AUTHORIZATION);
         })
+})
+
+UserRouter.get('/my-trips', async (req, res) => {
+    const user = await UserModel.getOneByQuery({_id: req.user.sub})
+    const userTrips = await TripRecommendUserModel.getByQuery({user})
+    HttpUtil.makeJsonResponse(res, userTrips)
+})
+
+UserRouter.delete('/trip', async (req, res) => {
+    const id = req.query.id;
+    const user = await UserModel.getOneByQuery({_id: req.user.sub})
+    const userTrip = await TripRecommendUserModel.getOneByQuery({user, _id: id})
+    const deletedModel = await TripRecommendUserModel.deleteModel(userTrip) 
+    HttpUtil.makeJsonResponse(res, {message: 'successfully'})
 })
 
 UserRouter.post('/', (req, res) => {

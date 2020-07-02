@@ -1,4 +1,4 @@
-import Schema from "mongoose";
+import {Schema} from "mongoose";
 export const TripRecommendUserSchema = {
     user: {
         type: Schema.ObjectId,
@@ -9,22 +9,26 @@ export const TripRecommendUserSchema = {
 
     recommendRoutes: [
         {
+            index: Number,
             distance: Number,
             fitness_value: Number,
             user_perference: Number,
-            route: [String],
+            route: [
+                {
+                    placeId: Number,
+                    planning: {
+                        type: Schema.Types.Mixed
+                    },
+                    place: {
+                        type: Schema.Types.Mixed
+                    }
+                }
+            ],
         }
     ],
 
-    userPreferenceRouteIndex: [
-        {
-            placeId: Number,
-            planning: {
-                type: Schema.Types.Mixed
-            }
-        }
-    ],
+    userPreferenceRouteIndex: [Number],
 
-    ds: Date
+    createdAt: Date
 
 } 

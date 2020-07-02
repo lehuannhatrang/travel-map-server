@@ -15,7 +15,6 @@ IndexRoute.use(jwt({
 
 // Check Token Expired
 IndexRoute.use((err, req, res, next) => {
-    console.log(req.headers)
     if (err.name === 'UnauthorizedError') {
         let errorCode = Error.UN_AUTHORIZATION;
         if (err.inner && err.inner.name === 'TokenExpiredError') {

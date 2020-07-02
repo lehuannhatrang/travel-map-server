@@ -134,7 +134,6 @@ PlaceRouter.post('/rating', async (req, res) => {
     const placeId = body.placeId;
     const rating = body.rating;
     const comment = body.comment;
-    console.log(placeId, rating, comment)
     const currentUser = await UserModel.getOneByQuery({_id: req.user.sub})
 
     const placeInfo = await PlaceInfoModel.getOneByQuery({placeId})

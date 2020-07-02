@@ -10,20 +10,16 @@ class AuthenMiddleware {
 
     static strategyLocal() {
         return new LocalStrategy((username, password, done) => {
-            console.log(username)
             UserModel.getOneByQuery({email: username})
                 .then(user => {
-                    console.log(user)
                     if (!user) {
                         return done(null, false, {message: 'Incorrect username or password'});
                     }
 
                     const result = passwordHash.verify(password, user.password);    
-                    console.log("result: ", result);
                     if (!result) {
                         return done(err, false, {message: 'Incorrect username or password'});
                     }
-                    console.log("OK");
                     return done(null, user);
                 });
         })

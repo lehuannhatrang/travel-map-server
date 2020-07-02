@@ -1,5 +1,5 @@
 import express from 'express';
-import {UserActionModel, UserModel, PlaceInfoModel, UserCriteriaModel} from '../../models';
+import {UserActionModel, UserModel, PlaceInfoModel, UserCriteriaModel, TripRecommendUserModel} from '../../models';
 import HttpUtil from "../../utils/http.util";
 import {Error} from "../../errors/Error";
 import { IndexConfig, CommonConfig } from "../../../configs";
@@ -11,9 +11,17 @@ const recommenderServiceApiHeaders = {
     "Authorization": CommonConfig.RECOMMENDER_SERVICE_API_KEY
 }
 
+router.get('/', async (req, res) => {
+    const id = req.query.id;
+    const user = await UserModel.getOneByQuery({_id: req.user.sub})
+    const trips = await TripRecommendUserModel.getOneByQuery({user, _id: id})
+    HttpUtil.makeJsonResponse(res, trips)
+})
+
 router.post('/suggestion-trips', async (req, res) => {
-    console.log('lll')
-    const planning = req.body.planning
+    const planning = req.body.planning;
+
+    const travelDate = req.body.travelDate;
 
     const currentUser = await UserModel.getOneByQuery({_id: req.user.sub})
 
@@ -39,9 +47,47 @@ router.post('/suggestion-trips', async (req, res) => {
         suggestionTrips = await HttpUtil.postJson(`${IndexConfig.RECOMMENDER_SERVICE_URL}/planning-trips`, {userId: currentUser.userId, criteria, planning, userMF: false}, recommenderServiceApiHeaders);
     }
 
-    console.log(suggestionTrips.routes[0].route)
+    const recommendTrip = {
+        user: currentUser,
+        date: new Date(travelDate),
+        recommendRoutes: suggestionTrips.routes.map((route, index) => ({
+            ...route,
+            index
+        })),
+        createdAt: new Date(),
+    }
 
-    HttpUtil.makeJsonResponse(res, suggestionTrips)
+    const newTrips = await TripRecommendUserModel.createModel(recommendTrip)
+
+    HttpUtil.makeJsonResponse(res, {routes: suggestionTrips.routes, id: newTrips._id})
+})
+
+router.post('/prefer', async (req, res) => {
+    const id = req.body.id;
+    const index = req.body.index;
+    let trips = await TripRecommendUserModel.getOneByQuery({_id: id})
+    if(!trips) {
+        return HttpUtil.makeJsonResponse(res, 500)
+    }
+
+    const newPrefer = trips.userPreferenceRouteIndex.concat([index])
+    trips.userPreferenceRouteIndex = [...new Set(newPrefer)]
+    const updateModel = await TripRecommendUserModel.updateModel(trips)
+    HttpUtil.makeJsonResponse(res, {status: 'success', preferIndex: updateModel.userPreferenceRouteIndex})
+})
+
+router.post('/unlike', async (req, res) => {
+    const id = req.body.id;
+    const index = req.body.index;
+    let trips = await TripRecommendUserModel.getOneByQuery({_id: id})
+    if(!trips) {
+        return HttpUtil.makeJsonResponse(res, 500)
+    }
+
+    const newPrefer = trips.userPreferenceRouteIndex.filter(ind => ind !== index)
+    trips.userPreferenceRouteIndex = [...new Set(newPrefer)]
+    const updateModel = await TripRecommendUserModel.updateModel(trips)
+    HttpUtil.makeJsonResponse(res, {status: 'success', preferIndex: updateModel.userPreferenceRouteIndex})
 })
 
 export default router;
